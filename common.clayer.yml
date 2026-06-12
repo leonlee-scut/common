@@ -1,0 +1,14 @@
+layer:
+  description: common code for every project
+  add-path:
+    - inc
+
+  groups:
+    - group: commom
+      files:
+        - file: src/assert.c
+        # - file: src/atomic.c
+        # - file: src/c_log.c
+        - file: src/critical_section.c
+        - file: src/fifo.c
+        - file: src/fxn.c
