@@ -28,16 +28,16 @@
   */
 typedef struct
 {
-    _iq target;        // Target value (setpoint)
-    _iq Kp;            // Proportional gain
-    _iq Ki;            // Integral gain
-    _iq Kd;            // Derivative gain
-    _iq Kb;            // Anti-windup gain, normally, Kb = 1 / Kp or 1 / sqrt(Kp * Ki)
-    _iq maxout;        // Maximum output limit
-    _iq minout;        // Minimum output limit
-    _iq threshold;     // Integral separation threshold
-    _iq prev_err;      // Previous error for derivative calculation
-    _iq integral;      // Integral term accumulator
+    _iq target;        //!< Target value (setpoint)
+    _iq Kp;            //!< Proportional gain
+    _iq Ki;            //!< Integral gain
+    _iq Kd;            //!< Derivative gain
+    _iq Kb;            //!< Anti-windup gain, normally, Kb = 1 / Kp or 1 / sqrt(Kp * Ki)
+    _iq maxout;        //!< Maximum output limit
+    _iq minout;        //!< Minimum output limit
+    _iq threshold;     //!< Integral separation threshold
+    _iq prev_err;      //!< Previous error for derivative calculation
+    _iq integral;      //!< Integral term accumulator
 } iqPID_TypeDef;
 
 
@@ -46,14 +46,14 @@ typedef struct
   */
 typedef struct
 {
-    _iq target;        // Target value (setpoint)
-    _iq Kp;            // Proportional gain
-    _iq Ki;            // Integral gain
-    _iq Kd;            // Derivative gain
-    _iq Kb;            // Anti-windup gain, normally, Kb = 1 / Kp or 1 / sqrt(Kp * Ki)
-    _iq maxout;        // Maximum output limit
-    _iq minout;        // Minimum output limit
-    _iq threshold;     // Integral separation threshold
+    _iq target;        //!< Target value (setpoint)
+    _iq Kp;            //!< Proportional gain
+    _iq Ki;            //!< Integral gain
+    _iq Kd;            //!< Derivative gain
+    _iq Kb;            //!< Anti-windup gain, normally, Kb = 1 / Kp or 1 / sqrt(Kp * Ki)
+    _iq maxout;        //!< Maximum output limit
+    _iq minout;        //!< Minimum output limit
+    _iq threshold;     //!< Integral separation threshold
 } iqPID_ParamTypeDef;
 
 #ifdef __cplusplus
