@@ -24,67 +24,15 @@
   * @brief Initialize the IQ IIR filter.
   * 
   * @param filter Pointer to the IQ IIR filter instance.
-  * @param coeff The filter coefficient, should be in the range [0, 1].
+  * @param alpha The filter coefficient, should be in the range [0, 1].
   *
   */
-void iqIIR_init(iqIIR_FILTER_t* filter, _iq coeff)
+void iqIIR_init(iqIIR_t* filter, _iq alpha)
 {
-    coeff = _IQsat(coeff, _IQ(1.0), _IQ(0.0)); // Ensure coeff is in [0, 1]
+    alpha = _IQsat(alpha, _IQ(1.0), _IQ(0.0)); // Ensure alpha is in [0, 1]
 
-    filter->coeff = coeff;
+    filter->alpha = alpha;
     filter->filtered_value = 0;
-}
-
-
-/**
-  * @brief Reset the IQ IIR filter.
-  * 
-  * @param filter Pointer to the IQ IIR filter instance.
-  *
-  */
-void iqIIR_reset(iqIIR_FILTER_t* filter)
-{
-    filter->filtered_value = 0;
-}
-
-
-/**
-  * @brief Set the filter coefficient of the IQ IIR filter.
-  * 
-  * @param filter Pointer to the IQ IIR filter instance.
-  * @param coeff The filter coefficient, should be in the range [0, 1].
-  *
-  */
-void iqIIR_setCoefficient(iqIIR_FILTER_t* filter, _iq coeff)
-{
-    coeff = _IQsat(coeff, _IQ(1.0), _IQ(0.0)); // Ensure coeff is in [0, 1]
-    filter->coeff = coeff;
-}
-
-
-/**
-  * @brief Get the filter coefficient of the IQ IIR filter.
-  * 
-  * @param filter Pointer to the IQ IIR filter instance.
-  * @return The filter coefficient.
-  *
-  */
-_iq iqIIR_getCoefficient(const iqIIR_FILTER_t* filter)
-{
-    return filter->coeff;
-}
-
-
-/**
-  * @brief Get the filtered value of the IQ IIR filter.
-  * 
-  * @param filter Pointer to the IQ IIR filter instance.
-  * @return The filtered value.
-  *
-  */
-_iq iqIIR_getFilteredValue(const iqIIR_FILTER_t* filter)
-{
-    return filter->filtered_value;
 }
 
 
@@ -100,42 +48,42 @@ _iq iqIIR_getFilteredValue(const iqIIR_FILTER_t* filter)
   *      
   *       The IIR filter is defined by the following difference equation:
   *
-  *             y[n] = coeff * (x[n] - y[n-1]) + y[n-1]
+  *             y[n] = alpha * (x[n] - y[n-1]) + y[n-1]
   *
   *       where y[n] is the filtered output at time n,
   *             y[n-1] is the previous filtered output,
   *             x[n] is the input at time n,
-  *             coeff is the filter coefficient, and is in the range [0, 1]. 
+  *             alpha is the filter coefficient, and is in the range [0, 1]. 
   *       
-  *       The filter coefficient @c coeff controls the filter's response to the input. 
-  *       When coeff is close to 0, the filter has a slower response and more 
+  *       The filter coefficient @c alpha controls the filter's response to the input. 
+  *       When alpha is close to 0, the filter has a slower response and more 
   *       smoothing effect. 
-  *       When coeff is close to 1, the filter has a faster response and less
+  *       When alpha is close to 1, the filter has a faster response and less
   *       smoothing effect.
   *
   *       If target cut-off frequency is desired, the filter coefficient can be
   *       calculated as:
   *
-  *             coeff = 1 - exp(-2 * pi * fc / fs)
+  *             alpha = 1 - exp(-2 * pi * fc / fs)
   *
   *       where fc is the cut-off frequency and fs is the sampling frequency.
   *
   *       If applying the filter to simulate a RC low-pass filter, the filter 
   *       coefficient can be calculated as:
   *
-  *             coeff = Ts / (RC + Ts)
+  *             alpha = Ts / (RC + Ts)
   *
   *       where Ts is the sampling period and RC is the RC time constant.
   *
   *       The filter cut-off frequency can be calculated by the coefficient as:
   *
-  *            fc = -fs / (2 * pi) * ln(1 - coeff)
+  *            fc = -fs / (2 * pi) * ln(1 - alpha)
   *
   */
-_iq iqIIR_filter(iqIIR_FILTER_t* filter, _iq input)
+_iq iqIIR_filter(iqIIR_t* filter, _iq input)
 {
     _iq output = input - filter->filtered_value;
-    output = _IQmpy(output, filter->coeff);
+    output = _IQmpy(output, filter->alpha);
     output += filter->filtered_value;
 
     filter->filtered_value = output; 

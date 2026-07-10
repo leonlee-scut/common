@@ -38,7 +38,7 @@ typedef struct
     _iq threshold;     //!< Integral separation threshold
     _iq prev_err;      //!< Previous error for derivative calculation
     _iq integral;      //!< Integral term accumulator
-} iqPID_TypeDef;
+} iqPID_t;
 
 
 /** 
@@ -54,16 +54,16 @@ typedef struct
     _iq maxout;        //!< Maximum output limit
     _iq minout;        //!< Minimum output limit
     _iq threshold;     //!< Integral separation threshold
-} iqPID_ParamTypeDef;
+} iqPID_PARAM_t;
 
 #ifdef __cplusplus
 extern "C" {
 #endif /* extern "C" */
 
-void iqPID_init(iqPID_TypeDef *pid, const iqPID_ParamTypeDef *init);
-_iq  iqPID_calculate(iqPID_TypeDef *pid, _iq measurement);
-void iqPID_reset(iqPID_TypeDef *pid);
-void iqPID_getParameters(const iqPID_TypeDef *pid, iqPID_ParamTypeDef *param);
+void iqPID_init(iqPID_t *pid, const iqPID_PARAM_t *init);
+_iq  iqPID_calculate(iqPID_t *pid, _iq measurement);
+void iqPID_reset(iqPID_t *pid);
+void iqPID_getParameters(const iqPID_t *pid, iqPID_PARAM_t *param);
 
 
 /** 
@@ -86,7 +86,7 @@ __STATIC_INLINE void _IQswap(_iq *a, _iq *b)
   * @param target The target value.
   *
   */
-__STATIC_INLINE void iqPID_setTarget(iqPID_TypeDef *pid, _iq target)
+__STATIC_INLINE void iqPID_setTarget(iqPID_t *pid, _iq target)
 {
     pid->target = target;
 }
@@ -101,7 +101,7 @@ __STATIC_INLINE void iqPID_setTarget(iqPID_TypeDef *pid, _iq target)
   * @param Kb The anti-windup gain.
   *
   */
-__STATIC_INLINE void iqPID_setGains(iqPID_TypeDef *pid, _iq Kp, _iq Ki, _iq Kd, _iq Kb)
+__STATIC_INLINE void iqPID_setGains(iqPID_t *pid, _iq Kp, _iq Ki, _iq Kd, _iq Kb)
 {
     pid->Kp = Kp;
     pid->Ki = Ki;
@@ -117,7 +117,7 @@ __STATIC_INLINE void iqPID_setGains(iqPID_TypeDef *pid, _iq Kp, _iq Ki, _iq Kd, 
   * @param maxout The maximum output limit.
   *
   */
-__STATIC_INLINE void iqPID_setOutputLimits(iqPID_TypeDef *pid, _iq minout, _iq maxout)
+__STATIC_INLINE void iqPID_setOutputLimits(iqPID_t *pid, _iq minout, _iq maxout)
 {
     if (maxout < minout)
     {
@@ -136,7 +136,7 @@ __STATIC_INLINE void iqPID_setOutputLimits(iqPID_TypeDef *pid, _iq minout, _iq m
   * @param Kp The proportional gain.
   *
   */
-__STATIC_INLINE void iqPID_setProportionalGain(iqPID_TypeDef *pid, _iq Kp)
+__STATIC_INLINE void iqPID_setProportionalGain(iqPID_t *pid, _iq Kp)
 {
     pid->Kp = Kp;
 }
@@ -148,7 +148,7 @@ __STATIC_INLINE void iqPID_setProportionalGain(iqPID_TypeDef *pid, _iq Kp)
   * @param Ki The integral gain.
   *
   */
-__STATIC_INLINE void iqPID_setIntegralGain(iqPID_TypeDef *pid, _iq Ki)
+__STATIC_INLINE void iqPID_setIntegralGain(iqPID_t *pid, _iq Ki)
 {
     pid->Ki = Ki;
 }
@@ -160,7 +160,7 @@ __STATIC_INLINE void iqPID_setIntegralGain(iqPID_TypeDef *pid, _iq Ki)
   * @param Kd The derivative gain.
   *
   */
-__STATIC_INLINE void iqPID_setDerivativeGain(iqPID_TypeDef *pid, _iq Kd)
+__STATIC_INLINE void iqPID_setDerivativeGain(iqPID_t *pid, _iq Kd)
 {
     pid->Kd = Kd;
 }
@@ -172,7 +172,7 @@ __STATIC_INLINE void iqPID_setDerivativeGain(iqPID_TypeDef *pid, _iq Kd)
   * @param Kb The anti-windup gain.
   *
   */
-__STATIC_INLINE void iqPID_setAntiwindupGain(iqPID_TypeDef *pid, _iq Kb)
+__STATIC_INLINE void iqPID_setAntiwindupGain(iqPID_t *pid, _iq Kb)
 {
     pid->Kb = Kb;
 }
@@ -184,7 +184,7 @@ __STATIC_INLINE void iqPID_setAntiwindupGain(iqPID_TypeDef *pid, _iq Kb)
   * @param maxout The maximum output limit.
   *
   */
-__STATIC_INLINE void iqPID_setMaxOutput(iqPID_TypeDef *pid, _iq maxout)
+__STATIC_INLINE void iqPID_setMaxOutput(iqPID_t *pid, _iq maxout)
 {
     pid->maxout = maxout;
 
@@ -201,7 +201,7 @@ __STATIC_INLINE void iqPID_setMaxOutput(iqPID_TypeDef *pid, _iq maxout)
   * @param minout The minimum output limit.
   *
   */
-__STATIC_INLINE void iqPID_setMinOutput(iqPID_TypeDef *pid, _iq minout)
+__STATIC_INLINE void iqPID_setMinOutput(iqPID_t *pid, _iq minout)
 {
     pid->minout = minout;
 
@@ -218,7 +218,7 @@ __STATIC_INLINE void iqPID_setMinOutput(iqPID_TypeDef *pid, _iq minout)
   * @param threshold The integral separation threshold.
   *
   */
-__STATIC_INLINE void iqPID_setIntegralSeparationThreshold(iqPID_TypeDef *pid, _iq threshold)
+__STATIC_INLINE void iqPID_setIntegralSeparationThreshold(iqPID_t *pid, _iq threshold)
 {
     pid->threshold = threshold;
 }
@@ -233,7 +233,7 @@ __STATIC_INLINE void iqPID_setIntegralSeparationThreshold(iqPID_TypeDef *pid, _i
   * @param Kd Pointer to store the derivative gain.
   * @param Kb Pointer to store the anti-windup gain.
   */
-__STATIC_INLINE void iqPID_getGains(const iqPID_TypeDef *pid, _iq *Kp, _iq *Ki, _iq *Kd, _iq *Kb)
+__STATIC_INLINE void iqPID_getGains(const iqPID_t *pid, _iq *Kp, _iq *Ki, _iq *Kd, _iq *Kb)
 {
     *Kp = pid->Kp;
     *Ki = pid->Ki;
@@ -248,7 +248,7 @@ __STATIC_INLINE void iqPID_getGains(const iqPID_TypeDef *pid, _iq *Kp, _iq *Ki, 
   * @return The target value.
   *
   */
-__STATIC_INLINE _iq iqPID_getTarget(const iqPID_TypeDef *pid)
+__STATIC_INLINE _iq iqPID_getTarget(const iqPID_t *pid)
 {
     return pid->target;
 }
@@ -260,7 +260,7 @@ __STATIC_INLINE _iq iqPID_getTarget(const iqPID_TypeDef *pid)
   * @return The proportional gain.
   *
   */
-__STATIC_INLINE _iq iqPID_getProportionalGain(const iqPID_TypeDef *pid)
+__STATIC_INLINE _iq iqPID_getProportionalGain(const iqPID_t *pid)
 {
     return pid->Kp;
 }
@@ -272,7 +272,7 @@ __STATIC_INLINE _iq iqPID_getProportionalGain(const iqPID_TypeDef *pid)
   * @return The integral gain.
   *
   */
-__STATIC_INLINE _iq iqPID_getIntegralGain(const iqPID_TypeDef *pid)
+__STATIC_INLINE _iq iqPID_getIntegralGain(const iqPID_t *pid)
 {
     return pid->Ki;
 }
@@ -284,7 +284,7 @@ __STATIC_INLINE _iq iqPID_getIntegralGain(const iqPID_TypeDef *pid)
   * @return The derivative gain.
   *
   */
-__STATIC_INLINE _iq iqPID_getDerivativeGain(const iqPID_TypeDef *pid)
+__STATIC_INLINE _iq iqPID_getDerivativeGain(const iqPID_t *pid)
 {
     return pid->Kd;
 }
@@ -296,7 +296,7 @@ __STATIC_INLINE _iq iqPID_getDerivativeGain(const iqPID_TypeDef *pid)
   * @return The anti-windup gain.
   *
   */
-__STATIC_INLINE _iq iqPID_getAntiwindupGain(const iqPID_TypeDef *pid)
+__STATIC_INLINE _iq iqPID_getAntiwindupGain(const iqPID_t *pid)
 {
     return pid->Kb;
 }
@@ -308,7 +308,7 @@ __STATIC_INLINE _iq iqPID_getAntiwindupGain(const iqPID_TypeDef *pid)
   * @return The maximum output limit.
   *
   */
-__STATIC_INLINE _iq iqPID_getMaxOutput(const iqPID_TypeDef *pid)
+__STATIC_INLINE _iq iqPID_getMaxOutput(const iqPID_t *pid)
 {
     return pid->maxout;
 }
@@ -320,7 +320,7 @@ __STATIC_INLINE _iq iqPID_getMaxOutput(const iqPID_TypeDef *pid)
   * @return The minimum output limit.
   *
   */
-__STATIC_INLINE _iq iqPID_getMinOutput(const iqPID_TypeDef *pid)
+__STATIC_INLINE _iq iqPID_getMinOutput(const iqPID_t *pid)
 {
     return pid->minout;
 }
@@ -332,7 +332,7 @@ __STATIC_INLINE _iq iqPID_getMinOutput(const iqPID_TypeDef *pid)
   * @return The integral separation threshold.
   *
   */
-__STATIC_INLINE _iq iqPID_getIntegralSeparationThreshold(const iqPID_TypeDef *pid)
+__STATIC_INLINE _iq iqPID_getIntegralSeparationThreshold(const iqPID_t *pid)
 {
     return pid->threshold;
 }

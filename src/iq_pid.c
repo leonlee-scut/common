@@ -24,7 +24,7 @@
   * @param init Pointer to the initialization structure.
   *
   */
-void iqPID_init(iqPID_TypeDef *pid, const iqPID_ParamTypeDef *init)
+void iqPID_init(iqPID_t *pid, const iqPID_PARAM_t *init)
 {
     pid->target    = init->target;
     pid->Kp        = init->Kp;
@@ -52,7 +52,7 @@ void iqPID_init(iqPID_TypeDef *pid, const iqPID_ParamTypeDef *init)
   * @return The calculated output.
   *
   */
-_iq iqPID_calculate(iqPID_TypeDef* pid, _iq measurement)
+_iq iqPID_calculate(iqPID_t* pid, _iq measurement)
 {
         // 1. Calculate error
     _iq err   = pid->target - measurement;
@@ -93,7 +93,7 @@ _iq iqPID_calculate(iqPID_TypeDef* pid, _iq measurement)
   * @param pid Pointer to the IQ PID controller instance.
   *
   */
-void iqPID_reset(iqPID_TypeDef* pid)
+void iqPID_reset(iqPID_t* pid)
 {
     pid->prev_err = 0;
     pid->integral = 0;
@@ -106,7 +106,7 @@ void iqPID_reset(iqPID_TypeDef* pid)
   * @param param Pointer to the IQ PID parameter structure to be filled.
   *
   */
-void iqPID_getParameters(const iqPID_TypeDef* pid, iqPID_ParamTypeDef* param)
+void iqPID_getParameters(const iqPID_t* pid, iqPID_PARAM_t* param)
 {
     param->target    = pid->target;
     param->Kp        = pid->Kp;
