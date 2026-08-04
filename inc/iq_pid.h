@@ -22,38 +22,76 @@
 #include "cmsis_compiler.h"
 #include "IQmathLib.h"
 
+#define iqPID_SET_TARGET(pid, target)       ((pid)->target = (target))
+#define iqPID_SET_FEEDBACK(pid, feedback)   ((pid)->feedback = (feedback))
+#define iqPID_SET_Kp(pid, Kp)               ((pid)->Kp = (Kp))
+#define iqPID_SET_Ki(pid, Ki)               ((pid)->Ki = (Ki))
+#define iqPID_SET_Kd(pid, Kd)               ((pid)->Kd = (Kd))
+#define iqPID_SET_Kc(pid, Kc)               ((pid)->Kc = (Kc))
 
+#define iqPID_GET_TARGET(pid)               ((pid)->target)
+#define iqPID_GET_FEEDBACK(pid)             ((pid)->feedback)
+#define iqPID_GET_Kp(pid)                   ((pid)->Kp)
+#define iqPID_GET_Ki(pid)                   ((pid)->Ki)
+#define iqPID_GET_Kd(pid)                   ((pid)->Kd)
+#define iqPID_GET_Kc(pid)                   ((pid)->Kc)
+
+#define iqPI_MARCO(pid)     do { \
+                                (pid)->err = (pid)->target - (pid)->feedback; \
+                                (pid)->p_term = _IQmpy((pid)->Kp, (pid)->err); \
+                                (pid)->i_term += _IQmpy((pid)->Ki, (pid)->p_term) + _IQmpy((pid)->Kc, (pid)->sat_err); \
+                                (pid)->pre_sat = (pid)->p_term + (pid)->i_term; \
+                                (pid)->output = _IQsat((pid)->pre_sat, (pid)->maxout, (pid)->minout); \
+                                (pid)->sat_err = (pid)->output - (pid)->pre_sat; \
+                                (pid)->p_term1 = (pid)->p_term; \
+                            } while(0)
+
+#define iqPID_MARCO(pid)    do {\
+                                (pid)->err = (pid)->target - (pid)->feedback; \
+                                (pid)->p_term = _IQmpy((pid)->Kp, (pid)->err); \
+                                (pid)->i_term += _IQmpy((pid)->Ki, (pid)->p_term) + _IQmpy((pid)->Kc, (pid)->sat_err); \
+                                (pid)->d_term = _IQmpy((pid)->Kd, ((pid)->p_term - (pid)->p_term1)); \
+                                (pid)->pre_sat = (pid)->p_term + (pid)->i_term + (pid)->d_term; \
+                                (pid)->output = _IQsat((pid)->pre_sat, (pid)->maxout, (pid)->minout); \
+                                (pid)->sat_err = (pid)->output - (pid)->pre_sat; \
+                                (pid)->p_term1 = (pid)->p_term; \
+                            } while(0)
 /**
   * @brief Struct of Dynamic Anti-Windup PID controller parameters and state variables.
   */
 typedef struct
 {
-    _iq target;        //!< Target value (setpoint)
-    _iq Kp;            //!< Proportional gain
-    _iq Ki;            //!< Integral gain
-    _iq Kd;            //!< Derivative gain
-    _iq Kb;            //!< Anti-windup gain, normally, Kb = 1 / Kp or 1 / sqrt(Kp * Ki)
-    _iq maxout;        //!< Maximum output limit
-    _iq minout;        //!< Minimum output limit
-    _iq threshold;     //!< Integral separation threshold
-    _iq prev_err;      //!< Previous error for derivative calculation
-    _iq integral;      //!< Integral term accumulator
+    _iq target;        //!< Input:     Target value (setpoint)
+    _iq feedback;      //!< Input:     Measured value
+    _iq Kp;            //!< Parameter: Proportional gain
+    _iq Ki;            //!< Parameter: Integral gain
+    _iq Kd;            //!< Parameter: Derivative gain
+    _iq Kc;            //!< Parameter: Anti-windup gain, normally, Kc = 1 / Kp or 1 / sqrt(Kp * Ki)
+    _iq maxout;        //!< Parameter: Maximum output limit
+    _iq minout;        //!< Parameter: Minimum output limit
+    _iq err;           //!< Variable:  Error
+    _iq p_term;        //!< Variable:  Proportional output
+    _iq i_term;        //!< Variable:  Integral output 
+    _iq d_term;        //!< Variable:  Derivative output 
+    _iq sat_err;       //!< Variable:  Saturation difference
+    _iq pre_sat;       //!< Variable:  Pre-saturation output
+    _iq p_term1;       //!< History:   Previous proportional output
+    _iq output;        //!< Output:    Output value of the PID controller
 } iqPID_t;
 
+typedef iqPID_t *iqPID_Handle_t;
 
 /** 
   * @brief Struct for initializing or getting parameters of the IQ PID controller.
   */
 typedef struct
 {
-    _iq target;        //!< Target value (setpoint)
     _iq Kp;            //!< Proportional gain
     _iq Ki;            //!< Integral gain
     _iq Kd;            //!< Derivative gain
-    _iq Kb;            //!< Anti-windup gain, normally, Kb = 1 / Kp or 1 / sqrt(Kp * Ki)
+    _iq Kc;            //!< Anti-windup gain, normally, Kc = 1 / Kp or 1 / sqrt(Kp * Ki)
     _iq maxout;        //!< Maximum output limit
     _iq minout;        //!< Minimum output limit
-    _iq threshold;     //!< Integral separation threshold
 } iqPID_PARAM_t;
 
 #ifdef __cplusplus
@@ -62,6 +100,7 @@ extern "C" {
 
 void iqPID_init(iqPID_t *pid, const iqPID_PARAM_t *init);
 _iq  iqPID_calculate(iqPID_t *pid, _iq measurement);
+_iq  iqPI_calculate(iqPID_t *pid, _iq measurement);
 void iqPID_reset(iqPID_t *pid);
 void iqPID_getParameters(const iqPID_t *pid, iqPID_PARAM_t *param);
 
@@ -93,20 +132,32 @@ __STATIC_INLINE void iqPID_setTarget(iqPID_t *pid, _iq target)
 
 
 /** 
+  * @brief Set the feedback value of the IQ PID controller.
+  * @param pid Pointer to the IQ PID controller instance.
+  * @param feedback The feedback value.
+  *
+  */
+__STATIC_INLINE void iqPID_setFeedback(iqPID_t *pid, _iq feedback)
+{
+    pid->feedback = feedback;
+}
+
+
+/** 
   * @brief Set the gains of the IQ PID controller.
   * @param pid Pointer to the IQ PID controller instance.
   * @param Kp The proportional gain.
   * @param Ki The integral gain.
   * @param Kd The derivative gain.
-  * @param Kb The anti-windup gain.
+  * @param Kc The anti-windup gain.
   *
   */
-__STATIC_INLINE void iqPID_setGains(iqPID_t *pid, _iq Kp, _iq Ki, _iq Kd, _iq Kb)
+__STATIC_INLINE void iqPID_setGains(iqPID_t *pid, _iq Kp, _iq Ki, _iq Kd, _iq Kc)
 {
     pid->Kp = Kp;
     pid->Ki = Ki;
     pid->Kd = Kd;
-    pid->Kb = Kb;
+    pid->Kc = Kc;
 }
 
 
@@ -119,13 +170,13 @@ __STATIC_INLINE void iqPID_setGains(iqPID_t *pid, _iq Kp, _iq Ki, _iq Kd, _iq Kb
   */
 __STATIC_INLINE void iqPID_setOutputLimits(iqPID_t *pid, _iq minout, _iq maxout)
 {
+    pid->maxout = maxout;
+    pid->minout = minout;
+
     if (maxout < minout)
     {
         _IQswap(&pid->maxout, &pid->minout);
     }
-
-    pid->maxout = maxout;
-    pid->minout = minout;
 }
 
 
@@ -169,12 +220,12 @@ __STATIC_INLINE void iqPID_setDerivativeGain(iqPID_t *pid, _iq Kd)
 /** 
   * @brief Set the anti-windup gain of the IQ PID controller.
   * @param pid Pointer to the IQ PID controller instance.
-  * @param Kb The anti-windup gain.
+  * @param Kc The anti-windup gain.
   *
   */
-__STATIC_INLINE void iqPID_setAntiwindupGain(iqPID_t *pid, _iq Kb)
+__STATIC_INLINE void iqPID_setAntiwindupGain(iqPID_t *pid, _iq Kc)
 {
-    pid->Kb = Kb;
+    pid->Kc = Kc;
 }
 
 
@@ -212,18 +263,6 @@ __STATIC_INLINE void iqPID_setMinOutput(iqPID_t *pid, _iq minout)
 }
 
 
-/** 
-  * @brief Set the integral separation threshold of the IQ PID controller.
-  * @param pid Pointer to the IQ PID controller instance.
-  * @param threshold The integral separation threshold.
-  *
-  */
-__STATIC_INLINE void iqPID_setIntegralSeparationThreshold(iqPID_t *pid, _iq threshold)
-{
-    pid->threshold = threshold;
-}
-
-
 /**
   * @brief Get the parameters of the IQ PID controller.
   * 
@@ -231,14 +270,14 @@ __STATIC_INLINE void iqPID_setIntegralSeparationThreshold(iqPID_t *pid, _iq thre
   * @param Kp Pointer to store the proportional gain.
   * @param Ki Pointer to store the integral gain.
   * @param Kd Pointer to store the derivative gain.
-  * @param Kb Pointer to store the anti-windup gain.
+  * @param Kc Pointer to store the anti-windup gain.
   */
-__STATIC_INLINE void iqPID_getGains(const iqPID_t *pid, _iq *Kp, _iq *Ki, _iq *Kd, _iq *Kb)
+__STATIC_INLINE void iqPID_getGains(const iqPID_t *pid, _iq *Kp, _iq *Ki, _iq *Kd, _iq *Kc)
 {
     *Kp = pid->Kp;
     *Ki = pid->Ki;
     *Kd = pid->Kd;
-    *Kb = pid->Kb;
+    *Kc = pid->Kc;
 }
 
 
@@ -298,7 +337,7 @@ __STATIC_INLINE _iq iqPID_getDerivativeGain(const iqPID_t *pid)
   */
 __STATIC_INLINE _iq iqPID_getAntiwindupGain(const iqPID_t *pid)
 {
-    return pid->Kb;
+    return pid->Kc;
 }
 
 
@@ -325,17 +364,6 @@ __STATIC_INLINE _iq iqPID_getMinOutput(const iqPID_t *pid)
     return pid->minout;
 }
 
-
-/** 
-  * @brief Get the integral separation threshold of the IQ PID controller.
-  * @param pid Pointer to the IQ PID controller instance.
-  * @return The integral separation threshold.
-  *
-  */
-__STATIC_INLINE _iq iqPID_getIntegralSeparationThreshold(const iqPID_t *pid)
-{
-    return pid->threshold;
-}
 
 #ifdef __cplusplus
 }

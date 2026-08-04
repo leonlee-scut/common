@@ -12,7 +12,9 @@ layer:
         - file: src/critical_section.c
         - file: src/fifo.c
         - file: src/fxn.c
-        - file: src/iq_pid.c
-        - file: src/iq_filter.c
         - file: src/hsm.c
         - file: src/hsm_event.c
+        - file: src/iq_pid.c
+          optimize: speed
+        - file: src/iq_filter.c
+          optimize: speed
