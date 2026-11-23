@@ -24,14 +24,14 @@
 #include "SEGGER_RTT.h"
 
 // Define log print function
-#define LOG_PRINT(format, ...)  SEGGER_RTT_printf(format, ##__VA_ARGS__)   
+#define LOG_PRINT(format, ...)  SEGGER_RTT_printf(0, format, ##__VA_ARGS__)
 
 // Define current log level
 #define CURRENT_LOG_LEVEL   LOG_LEVEL_DEBUG
 
 // Define path separator for different platforms
 // For Windows, use '\\', for Unix/Linux, use '/'
-#define PATH_SEPARATOR      '\'
+#define PATH_SEPARATOR      '\\'
 
 // Define log levels
 typedef enum{
